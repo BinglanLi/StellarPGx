@@ -469,7 +469,7 @@ process call_snvs1 {
         sam_ind='bai'   
       
     """
-    graphtyper genotype ${ref_dir}/${ref_genome} --sam=${name}.${ext} --sams_index=<(echo ${name}.${sam_ind}) --region=${region_a1} --output=${name}_var_1 --prior_vcf=${res_dir}/common_plus_core_var.vcf.gz -a ${debug38} ${cram_options}
+    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${name}.${ext} --sams_index=${name}.${sam_ind} --region=${region_a1} --output=${name}_var_1 --prior_vcf=${res_dir}/common_plus_core_var.vcf.gz -a ${debug38} ${cram_options}
     bcftools concat ${name}_var_1/${chrom}/*.vcf.gz > ${name}_var_1/${chrom}/${region_a2}.vcf 
     bgzip -f ${name}_var_1/${chrom}/${region_a2}.vcf 
     tabix -f ${name}_var_1/${chrom}/${region_a2}.vcf.gz
@@ -504,7 +504,7 @@ process call_snvs2 {
         sam_ind='bai'
 
     """
-    graphtyper genotype ${ref_dir}/${ref_genome} --sam=${name}.${ext} --sams_index=<(echo ${name}.${sam_ind}) --region=${region_a1} --output=${name}_var_2 -a ${debug38} ${debug37} ${cram_options}
+    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${name}.${ext} --sams_index=${name}.${sam_ind} --region=${region_a1} --output=${name}_var_2 -a ${debug38} ${debug37} ${cram_options}
     bcftools concat ${name}_var_2/${chrom}/*.vcf.gz > ${name}_var_2/${chrom}/${region_a2}.vcf       
     bgzip -f ${name}_var_2/${chrom}/${region_a2}.vcf
     tabix -f ${name}_var_2/${chrom}/${region_a2}.vcf.gz
@@ -540,7 +540,7 @@ process call_sv_del {
         sam_ind='bai'
       
     """
-    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sam=${name}.${ext} --region=${region_a1} --output=${name}_sv_del ${res_dir}/sv_test.vcf.gz 
+    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${name}.${ext} --region=${region_a1} --output=${name}_sv_del ${res_dir}/sv_test.vcf.gz 
 
     """
 
@@ -572,7 +572,7 @@ process call_sv_dup {
         sam_ind='bai'  
 
     """
-    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sam=${name}.${ext} --region=${region_a1} --output=${name}_sv_dup ${res_dir}/sv_test3.vcf.gz 
+    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${name}.${ext} --region=${region_a1} --output=${name}_sv_dup ${res_dir}/sv_test3.vcf.gz 
 
     """
 }
