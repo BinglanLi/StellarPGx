@@ -421,11 +421,12 @@ ref_genome = new File("${params.ref_file}").getName()
 
 workflow {
     ref_ch = Channel.value("${ref_dir_val}")
-    data_ch = Channel.fromFilePairs(params.in_bam, type: 'file')
-    call_snvs1(data_ch, ref_ch, res_dir)
-    call_snvs2(data_ch, ref_ch)
-    call_sv_del(data_ch, ref_ch, res_dir)
-    call_sv_dup(data_ch, ref_ch, res_dir)
+    data_ch = Channel.fromFilePairs(params.in_bam, type: 'file') {  file -> file.name.replaceAll(/.${ext}|.${ind}$/,'') }
+		file_list_ch = Channel.fromFilePairs(params.in_list, type: 'file')
+    call_snvs1(data_ch, file_list_ch, ref_ch, res_dir)
+    call_snvs2(data_ch, file_list_ch, ref_ch)
+    call_sv_del(data_ch, file_list_ch, ref_ch, res_dir)
+    call_sv_dup(data_ch, file_list_ch, ref_ch, res_dir)
     get_depth(data_ch, ref_ch, res_dir)
     call_snvs1.out.join(call_snvs2.out).set {var_ch_joined}
     format_snvs(var_ch_joined)
@@ -448,6 +449,7 @@ process call_snvs1 {
 
     input:
     tuple val(name), path(bam)
+    tuple val(listFileName), path(list)
     path ref_dir
     path res_dir
 
@@ -455,9 +457,8 @@ process call_snvs1 {
     tuple val(name), path("${name}_var_1")
       
     script:
-    
     """
-    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${bam[0]} --sams_index=${bam[1]} --region=${region_a1} --output=${name}_var_1 --prior_vcf=${res_dir}/common_plus_core_var.vcf.gz -a ${debug38} ${cram_options}
+    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${list[0]} --sams_index=${list[1]} --region=${region_a1} --output=${name}_var_1 --prior_vcf=${res_dir}/common_plus_core_var.vcf.gz -a ${debug38} ${cram_options}
     bcftools concat ${name}_var_1/${chrom}/*.vcf.gz > ${name}_var_1/${chrom}/${region_a2}.vcf 
     bgzip -f ${name}_var_1/${chrom}/${region_a2}.vcf 
     tabix -f ${name}_var_1/${chrom}/${region_a2}.vcf.gz
@@ -472,6 +473,7 @@ process call_snvs2 {
 
     input:
     tuple val(name), path(bam)
+    tuple val(listFileName), path(list)
     path ref_dir
 
     output: 
@@ -479,7 +481,7 @@ process call_snvs2 {
 
     script:
     """
-    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${bam[0]} --sams_index=${bam[1]}  --region=${region_a1} --output=${name}_var_2 -a ${debug38} ${debug37} ${cram_options}
+    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${list[0]} --sams_index=${list[1]}  --region=${region_a1} --output=${name}_var_2 -a ${debug38} ${debug37} ${cram_options}
     bcftools concat ${name}_var_2/${chrom}/*.vcf.gz > ${name}_var_2/${chrom}/${region_a2}.vcf       
     bgzip -f ${name}_var_2/${chrom}/${region_a2}.vcf
     tabix -f ${name}_var_2/${chrom}/${region_a2}.vcf.gz
@@ -494,6 +496,7 @@ process call_sv_del {
 
     input:
     tuple val(name), path(bam)
+    tuple val(listFileName), path(list)
     path ref_dir
     path res_dir
 
@@ -502,7 +505,7 @@ process call_sv_del {
 
     script:
     """
-    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${bam[0]} --region=${region_a1} --output=${name}_sv_del ${res_dir}/sv_test.vcf.gz
+    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${list[0]} --region=${region_a1} --output=${name}_sv_del ${res_dir}/sv_test.vcf.gz
 
     """
 
@@ -513,6 +516,7 @@ process call_sv_dup {
 
     input:
     tuple val(name), path(bam)
+    tuple val(listFileName), path(list)
     path ref_dir
     path res_dir
 
@@ -521,7 +525,7 @@ process call_sv_dup {
 
     script:
     """
-    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${bam[0]}  --region=${region_a1} --output=${name}_sv_dup ${res_dir}/sv_test3.vcf.gz
+    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${list[0]}  --region=${region_a1} --output=${name}_sv_dup ${res_dir}/sv_test3.vcf.gz
 
     """
 }
