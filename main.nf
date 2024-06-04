@@ -422,7 +422,8 @@ ref_genome = new File("${params.ref_file}").getName()
 workflow {
     ref_ch = Channel.value("${ref_dir_val}")
     data_ch = Channel.fromFilePairs(params.in_bam, type: 'file') {  file -> file.name.replaceAll(/.${ext}|.${ind}$/,'') }
-	res_dir.view { "resource dir is $it" }
+	println res_dir
+	println res_base
     call_snvs1(data_ch, ref_ch, res_dir)
     call_snvs2(data_ch, ref_ch)
     call_sv_del(data_ch, ref_ch, res_dir)
