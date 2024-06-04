@@ -458,7 +458,7 @@ process call_snvs1 {
       
     script:
     """
-    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${list[0]} --sams_index=${list[1]} --region=${region_a1} --output=${name}_var_1 --prior_vcf=${res_dir}/common_plus_core_var.vcf.gz -a ${debug38} ${cram_options}
+    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${list[1]} --sams_index=${list[0]} --region=${region_a1} --output=${name}_var_1 --prior_vcf=${res_dir}/common_plus_core_var.vcf.gz -a ${debug38} ${cram_options}
     bcftools concat ${name}_var_1/${chrom}/*.vcf.gz > ${name}_var_1/${chrom}/${region_a2}.vcf 
     bgzip -f ${name}_var_1/${chrom}/${region_a2}.vcf 
     tabix -f ${name}_var_1/${chrom}/${region_a2}.vcf.gz
@@ -481,7 +481,7 @@ process call_snvs2 {
 
     script:
     """
-    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${list[0]} --sams_index=${list[1]}  --region=${region_a1} --output=${name}_var_2 -a ${debug38} ${debug37} ${cram_options}
+    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${list[1]} --sams_index=${list[0]}  --region=${region_a1} --output=${name}_var_2 -a ${debug38} ${debug37} ${cram_options}
     bcftools concat ${name}_var_2/${chrom}/*.vcf.gz > ${name}_var_2/${chrom}/${region_a2}.vcf       
     bgzip -f ${name}_var_2/${chrom}/${region_a2}.vcf
     tabix -f ${name}_var_2/${chrom}/${region_a2}.vcf.gz
@@ -505,7 +505,7 @@ process call_sv_del {
 
     script:
     """
-    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${list[0]} --region=${region_a1} --output=${name}_sv_del ${res_dir}/sv_test.vcf.gz
+    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${list[1]} --region=${region_a1} --output=${name}_sv_del ${res_dir}/sv_test.vcf.gz
 
     """
 
@@ -525,7 +525,7 @@ process call_sv_dup {
 
     script:
     """
-    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${list[0]}  --region=${region_a1} --output=${name}_sv_dup ${res_dir}/sv_test3.vcf.gz
+    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${list[1]}  --region=${region_a1} --output=${name}_sv_dup ${res_dir}/sv_test3.vcf.gz
 
     """
 }
