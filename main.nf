@@ -421,7 +421,7 @@ ref_genome = new File("${params.ref_file}").getName()
 
 workflow {
     ref_ch = Channel.value("${ref_dir_val}")
-    data_ch = Channel.fromFilePairs(params.in_bam, type: 'file') {  file -> file.name.replaceAll(/.${ext}|.${ind}$/,'') }
+    data_ch = Channel.fromFilePairs(params.in_bam, type: 'file')
     call_snvs1(data_ch, ref_ch, res_dir)
     call_snvs2(data_ch, ref_ch)
     call_sv_del(data_ch, ref_ch, res_dir)
@@ -455,21 +455,9 @@ process call_snvs1 {
     tuple val(name), path("${name}_var_1")
       
     script:
-    ext1 = bam[0].getExtension()
-    if (ext1=='bam')
-        sam_ind='bam.bai'
-
-    else if (ext1=='cram')
-        sam_ind='cram.crai'
-
-    else if (ext1=='crai')
-        sam_ind='crai'
-
-    else
-        sam_ind='bai'   
-      
+    
     """
-    graphtyper genotype ${ref_dir}/${ref_genome} --sams=<(echo ${name}.${ext}) --sams_index=<(echo ${name}.${sam_ind}) --region=${region_a1} --output=${name}_var_1 --prior_vcf=${res_dir}/common_plus_core_var.vcf.gz -a ${debug38} ${cram_options}
+    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${bam[0]} --sams_index=${bam[1]} --region=${region_a1} --output=${name}_var_1 --prior_vcf=${res_dir}/common_plus_core_var.vcf.gz -a ${debug38} ${cram_options}
     bcftools concat ${name}_var_1/${chrom}/*.vcf.gz > ${name}_var_1/${chrom}/${region_a2}.vcf 
     bgzip -f ${name}_var_1/${chrom}/${region_a2}.vcf 
     tabix -f ${name}_var_1/${chrom}/${region_a2}.vcf.gz
@@ -490,21 +478,8 @@ process call_snvs2 {
     tuple val(name), path("${name}_var_2")
 
     script:
-    ext1 = bam[0].getExtension()
-    if (ext1=='bam')
-        sam_ind='bam.bai'
-
-    else if (ext1=='cram')
-        sam_ind='cram.crai'
-
-    else if (ext1=='crai')
-        sam_ind='crai'
-
-    else 
-        sam_ind='bai'
-
     """
-    graphtyper genotype ${ref_dir}/${ref_genome} --sams=<(echo ${name}.${ext}) --sams_index=<(echo ${name}.${sam_ind}) --region=${region_a1} --output=${name}_var_2 -a ${debug38} ${debug37} ${cram_options}
+    graphtyper genotype ${ref_dir}/${ref_genome} --sams=${bam[0]} --sams_index=${bam[1]}  --region=${region_a1} --output=${name}_var_2 -a ${debug38} ${debug37} ${cram_options}
     bcftools concat ${name}_var_2/${chrom}/*.vcf.gz > ${name}_var_2/${chrom}/${region_a2}.vcf       
     bgzip -f ${name}_var_2/${chrom}/${region_a2}.vcf
     tabix -f ${name}_var_2/${chrom}/${region_a2}.vcf.gz
@@ -526,21 +501,8 @@ process call_sv_del {
     tuple val(name), path("${name}_sv_del") 
 
     script:
-    ext1 = bam[0].getExtension()
-    if (ext1=='bam')
-        sam_ind='bam.bai'
-
-    else if (ext1=='cram')
-        sam_ind='cram.crai'
-
-    else if (ext1=='crai')
-        sam_ind='crai'
-
-    else 
-        sam_ind='bai'
-      
     """
-    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=<(echo ${name}.${ext}) --region=${region_a1} --output=${name}_sv_del ${res_dir}/sv_test.vcf.gz
+    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${bam[0]} --region=${region_a1} --output=${name}_sv_del ${res_dir}/sv_test.vcf.gz
 
     """
 
@@ -558,18 +520,8 @@ process call_sv_dup {
     tuple val(name), path("${name}_sv_dup") 
 
     script:
-    ext1 = bam[0].getExtension()
-    if (ext1=='bam')
-        sam_ind='bam.bai'
-    else if (ext1=='cram')
-        sam_ind='cram.crai'
-    else if (ext1=='crai')
-        sam_ind='crai'
-    else 
-        sam_ind='bai'  
-
     """
-    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=<(echo ${name}.${ext}) --region=${region_a1} --output=${name}_sv_dup ${res_dir}/sv_test3.vcf.gz
+    graphtyper genotype_sv ${ref_dir}/${ref_genome} --sams=${bam[0]}  --region=${region_a1} --output=${name}_sv_dup ${res_dir}/sv_test3.vcf.gz
 
     """
 }
